@@ -1,4 +1,4 @@
-package evaanufr.dev.reservationsystem;
+package evaanufr.dev.reservationsystem.web;
 
 import ch.qos.logback.classic.Logger;
 import jakarta.persistence.EntityNotFoundException;

@@ -1,4 +1,4 @@
-package evaanufr.dev.reservationsystem;
+package evaanufr.dev.reservationsystem.reservations;
 
 import jakarta.persistence.*;
 

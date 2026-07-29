@@ -1,16 +1,14 @@
-package evaanufr.dev.reservationsystem;
+package evaanufr.dev.reservationsystem.reservations;
 
 
 import ch.qos.logback.classic.Logger;
 import jakarta.validation.Valid;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @RestController   //обработчик http-запросов
 @RequestMapping("/reservation")
@@ -29,9 +27,15 @@ public class ReservationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Reservation>> getAllReservations() {
-        logger.info("Callded getAllReservations");
-        return ResponseEntity.ok(reservationService.findAllReservation());
+    public ResponseEntity<List<Reservation>> searchAllByFilter(
+            @RequestParam("roomId") Long roomId,
+            @RequestParam("userId") Long userId,
+            @RequestParam("pageSize") Integer pageSize,
+            @RequestParam("pageNumber") Integer pageNumber
+    ) {
+        logger.info("Callded searchAllByFilter");
+        var filter = new ReservationFilter(roomId, userId, pageSize, pageNumber);
+        return ResponseEntity.ok(reservationService.searchAllByFilter(filter));
     }
 
     @PostMapping

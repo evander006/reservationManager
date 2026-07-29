@@ -1,4 +1,4 @@
-package evaanufr.dev.reservationsystem;
+package evaanufr.dev.reservationsystem.web;
 
 import java.time.LocalDateTime;
 
@@ -7,5 +7,5 @@ public record ErrorResponseDto(
         LocalDateTime timestamp,
         String errorMsg
 ) {
-    
+
 }

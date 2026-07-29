@@ -1,4 +1,4 @@
-package evaanufr.dev.reservationsystem;
+package evaanufr.dev.reservationsystem.reservations;
 
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
