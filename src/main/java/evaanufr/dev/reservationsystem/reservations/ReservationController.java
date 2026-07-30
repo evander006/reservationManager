@@ -28,25 +28,25 @@ public class ReservationController {
 
     @GetMapping
     public ResponseEntity<List<Reservation>> searchAllByFilter(
-            @RequestParam("roomId") Long roomId,
-            @RequestParam("userId") Long userId,
-            @RequestParam("pageSize") Integer pageSize,
-            @RequestParam("pageNumber") Integer pageNumber
+            @RequestParam(value = "roomId", required = false) Long roomId,
+            @RequestParam(value = "userId", required = false) Long userId,
+            @RequestParam(value = "pageSize", required = false) Integer pageSize,
+            @RequestParam(value = "pageNumber", required = false) Integer pageNumber
     ) {
-        logger.info("Callded searchAllByFilter");
+        logger.info("Called searchAllByFilter");
         var filter = new ReservationFilter(roomId, userId, pageSize, pageNumber);
         return ResponseEntity.ok(reservationService.searchAllByFilter(filter));
     }
 
     @PostMapping
     public ResponseEntity<Reservation> createReservation(@RequestBody @Valid Reservation reservationToCreate) { //@RequestBody брать из тела запроса
-        logger.info("Callded createReservation");
+        logger.info("Called createReservation");
         return ResponseEntity.status(201).header("test-header", "123").body(reservationService.createReservation(reservationToCreate));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Reservation> updateReservation(@PathVariable("id") Long id, @RequestBody Reservation reservationToUpdate) {
-        logger.info("Callded updateReservation id:" + reservationToUpdate.id());
+        logger.info("Called updateReservation id:" + reservationToUpdate.id());
         return ResponseEntity.ok(reservationService.updateReservation(id, reservationToUpdate));
     }
 
@@ -59,7 +59,7 @@ public class ReservationController {
 
     @PostMapping("/{id}/approve")
     public ResponseEntity<Reservation> approveReservation(@PathVariable Long id) {
-        logger.info("Callded approveReservation id: " + id);
+        logger.info("Called approveReservation id: " + id);
         var reservation = reservationService.approveReservation(id);
         return ResponseEntity.ok(reservation);
     }

@@ -1,22 +1,25 @@
 package evaanufr.dev.reservationsystem.reservations;
 
 import ch.qos.logback.classic.Logger;
+import evaanufr.dev.reservationsystem.reservations.availability.ReservationAvailabilityService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.*;
 
 @Service
 public class ReservationService {
     private static final Logger logger = (Logger) LoggerFactory.getLogger(ReservationController.class);
     private final ReservationMapper reservationMapper;
+    private final ReservationAvailabilityService reservationAvailabilityService;
     private final ReservationRepository repo;
 
-    public ReservationService(ReservationMapper reservationMapper, ReservationRepository repo) {
+    public ReservationService(ReservationMapper reservationMapper, ReservationAvailabilityService reservationAvailabilityService, ReservationRepository repo) {
         this.reservationMapper = reservationMapper;
+        this.reservationAvailabilityService = reservationAvailabilityService;
         this.repo = repo;
     }
 
@@ -27,7 +30,11 @@ public class ReservationService {
     }
 
     public List<Reservation> searchAllByFilter(ReservationFilter filter) {
-        List<ReservationEntity> allReservations = repo.findAll();
+        int pageSize = filter.pageSize() != null ? filter.pageSize() : 10;
+        int pageNumber = filter.pageNumber() != null ? filter.pageNumber() : 0;
+        var pageable = Pageable.ofSize(pageSize).withPage(pageNumber);
+
+        List<ReservationEntity> allReservations = repo.searchAllByFilter(filter.roomId(), filter.userId(), pageable);
         List<Reservation> reservationList = allReservations.stream()
                 .map(reservationMapper::toDomain).toList();
         return reservationList;
@@ -82,8 +89,8 @@ public class ReservationService {
         if (!reservation.getReservationStatus().equals(ReservationStatus.PENDING)) {
             throw new NoSuchElementException("Cannot modify reservation: status= " + reservation.getReservationStatus());
         }
-        var isConflict = checkIfConflict(reservation.getRoomId(), reservation.getStartDate(), reservation.getEndDate());
-        if (isConflict) {
+        var isAvailable = reservationAvailabilityService.checkIfAvailable(reservation.getRoomId(), reservation.getStartDate(), reservation.getEndDate());
+        if (!isAvailable) {
             throw new IllegalStateException("Cannot modify reservation: conflicts found");
         }
         reservation.setReservationStatus(ReservationStatus.APPROVED);
@@ -92,14 +99,5 @@ public class ReservationService {
         return reservationMapper.toDomain(reservation);
     }
 
-    public boolean checkIfConflict(Long roomId, LocalDate startDate, LocalDate endDate) {
-        List<Long> conflictIds = repo.findConflictReservationIds(roomId, startDate, endDate, ReservationStatus.APPROVED);
-        if (conflictIds.isEmpty()) {
-            return false;
-        } else {
-            logger.info("Conflict with ids ={}", conflictIds);
-            return true;
-        }
-    }
 
 }
